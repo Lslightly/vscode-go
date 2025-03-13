@@ -2187,7 +2187,7 @@ export class GoDebugSession extends LoggingDebugSession {
 						breakpointIn.cond = breakpoint.condition;
 						return this.delve
 							?.callPromise('CreateBreakpoint', [
-								this.delve?.isApiV1 ? breakpointIn : { Breakpoint: breakpointIn }
+								this.delve?.isApiV1 ? breakpointIn : { Breakpoint: breakpointIn, suspended: true }
 							])
 							.then(undefined, async (err) => {
 								// Delve does not seem to support error code at this time.
