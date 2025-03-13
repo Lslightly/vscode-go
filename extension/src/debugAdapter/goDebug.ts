@@ -2222,6 +2222,8 @@ export class GoDebugSession extends LoggingDebugSession {
 										return null;
 									}
 									return this.delve?.isApiV1 ? matchedBreakpoint : { Breakpoint: matchedBreakpoint };
+								} else if (err.toString().startsWith("Suspended breakpoint")) {
+									return this.delve?.isApiV1 ? breakpointIn : { Breakpoint: breakpointIn }
 								}
 								log('Error on CreateBreakpoint: ' + err.toString());
 								return null;
