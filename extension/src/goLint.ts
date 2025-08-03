@@ -10,7 +10,8 @@ import { getGoConfig, getGoplsConfig } from './config';
 import { toolExecutionEnvironment } from './goEnv';
 import { diagnosticsStatusBarItem, outputChannel } from './goStatus';
 import { goplsStaticcheckEnabled } from './goTools';
-import { getWorkspaceFolderPath, handleDiagnosticErrors, ICheckResult, resolvePath, runTool } from './util';
+import { inspectGoToolVersion } from './goInstallTools';
+import { getBinPath, getWorkspaceFolderPath, handleDiagnosticErrors, ICheckResult, resolvePath, runTool } from './util';
 
 /**
  * Runs linter on the current file, package or workspace.
@@ -35,7 +36,7 @@ export function lintCode(scope?: string): CommandFactory {
 		const goConfig = getGoConfig(documentUri);
 		const goplsConfig = getGoplsConfig(documentUri);
 
-		outputChannel.appendLine('Linting...');
+		outputChannel.info('Linting...');
 		diagnosticsStatusBarItem.show();
 		diagnosticsStatusBarItem.text = 'Linting...';
 
@@ -63,7 +64,7 @@ export function lintCode(scope?: string): CommandFactory {
  * @param goConfig Configuration for the Go extension.
  * @param scope Scope in which to run the linter.
  */
-export function goLint(
+export async function goLint(
 	fileUri: vscode.Uri | undefined,
 	goConfig: vscode.WorkspaceConfiguration,
 	goplsConfig: vscode.WorkspaceConfiguration,
@@ -112,34 +113,69 @@ export function goLint(
 		}
 		args.push(flag);
 	});
-	if (lintTool === 'golangci-lint') {
+	if (lintTool.startsWith('golangci-lint')) {
+		let version: number;
+		if (lintTool === 'golangci-lint-v2') {
+			version = 2;
+		} else {
+			const { moduleVersion } = await inspectGoToolVersion(getBinPath(lintTool));
+			// if moduleVersion is undefined, treat it as version=1
+			// if moduleVersion is higher than v1 (v2, v3...), treat it as version=2
+			version = !moduleVersion || moduleVersion.startsWith('v1') ? 1 : 2;
+		}
+
+		// append common flags
 		if (args.indexOf('run') === -1) {
 			args.unshift('run');
 		}
-		if (args.indexOf('--print-issued-lines=false') === -1) {
-			// print only file:number:column
-			args.push('--print-issued-lines=false');
-		}
-		if (args.indexOf('--out-format=colored-line-number') === -1) {
-			// print file:number:column.
-			// Explicit override in case .golangci.yml calls for a format we don't understand
-			args.push('--out-format=colored-line-number');
-		}
-		if (args.indexOf('--issues-exit-code=') === -1) {
+		if (args.indexOf('--issues-exit-code=0') === -1) {
 			// adds an explicit no-error-code return argument, to avoid npm error
 			// message detection logic. See golang/vscode-go/issues/411
 			args.push('--issues-exit-code=0');
+		}
+		switch (version) {
+			case 1: // append golangci-lint v1 flags
+				if (args.indexOf('--print-issued-lines=false') === -1) {
+					// print only file:number:column
+					args.push('--print-issued-lines=false');
+				}
+				if (args.indexOf('--out-format=line-number') === -1) {
+					// print file:number:column.
+					// Explicit override in case .golangci.yml calls for a format we don't understand
+					args.push('--out-format=line-number');
+				}
+				break;
+
+			case 2: // append golangci-lint v2 flags
+				if (args.indexOf('--output.text.print-issued-lines=false') === -1) {
+					// print only file:number:column
+					args.push('--output.text.print-issued-lines=false');
+				}
+				if (args.indexOf('--show-stats=false') === -1) {
+					// print only file:number:column
+					args.push('--show-stats=false');
+				}
+				if (args.indexOf('--output.text.path=stdout') === -1) {
+					// print file:number:column.
+					// Explicit override in case .golangci.yml calls for a format we don't understand
+					args.push('--output.text.path=stdout');
+				}
+				if (!args.some((v) => v.startsWith('--path-mode='))) {
+					// print file name as absolute path
+					args.push('--path-mode=abs');
+				}
+				break;
 		}
 	}
 
 	if (scope === 'workspace' && currentWorkspace) {
 		args.push('./...');
-		outputChannel.appendLine(`Starting linting the current workspace at ${currentWorkspace}`);
+		outputChannel.info(`Starting linting the current workspace at ${currentWorkspace}`);
 	} else if (scope === 'file') {
 		args.push(fileUri?.fsPath ?? '');
-		outputChannel.appendLine(`Starting linting the current file at ${fileUri?.fsPath}`);
+		outputChannel.info(`Starting linting the current file at ${fileUri?.fsPath}`);
 	} else {
-		outputChannel.appendLine(`Starting linting the current package at ${cwd}`);
+		outputChannel.info(`Starting linting the current package at ${cwd}`);
 	}
 
 	running = true;

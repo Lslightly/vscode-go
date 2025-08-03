@@ -717,6 +717,29 @@ suite('Debug Configuration Converts Relative Paths', () => {
 		);
 	});
 
+	test('allow package path in dlv-dap mode', () => {
+		const config = debugConfig('dlv-dap');
+		config.program = 'example.com/foo/bar';
+
+		const workspaceFolder = {
+			uri: vscode.Uri.file(workspaceDir),
+			name: 'test',
+			index: 0
+		};
+		const { program, cwd, __buildDir } = debugConfigProvider.resolveDebugConfigurationWithSubstitutedVariables(
+			workspaceFolder,
+			config
+		)!;
+		assert.deepStrictEqual(
+			{ program, cwd, __buildDir },
+			{
+				program: 'example.com/foo/bar',
+				cwd: workspaceDir,
+				__buildDir: undefined
+			}
+		);
+	});
+
 	test('program and __buildDir are updated while resolving debug configuration in dlv-dap mode', () => {
 		createDirRecursively(path.join(workspaceDir, 'foo', 'bar', 'pkg'));
 
@@ -956,7 +979,7 @@ suite('Debug Configuration Default DebugAdapter', () => {
 		assert.strictEqual(resolvedConfig['debugAdapter'], 'dlv-dap');
 	});
 
-	test("default debugAdapter for remote mode should be 'legacy' when not in Preview mode", async () => {
+	test('default debugAdapter for remote mode should be determined by `dlv substitute-path-guess-helper`', async () => {
 		const config = {
 			name: 'Attach',
 			type: 'go',
@@ -966,9 +989,14 @@ suite('Debug Configuration Default DebugAdapter', () => {
 			cwd: '/path'
 		};
 
-		const want = extensionInfo.isPreview ? 'dlv-dap' : 'legacy';
 		await debugConfigProvider.resolveDebugConfiguration(undefined, config);
 		const resolvedConfig = config as any;
+
+		const substitutePathGuess = await debugConfigProvider.guessSubstitutePath();
+		let want = 'dlv-dap';
+		if (substitutePathGuess === null) {
+			want = 'legacy';
+		}
 		assert.strictEqual(resolvedConfig['debugAdapter'], want);
 	});
 

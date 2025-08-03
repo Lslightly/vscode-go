@@ -9,7 +9,7 @@ export const allToolsInformation: { [key: string]: Tool } = {
 		name: 'gomodifytags',
 		importPath: 'github.com/fatih/gomodifytags',
 		modulePath: 'github.com/fatih/gomodifytags',
-		replacedByGopls: false,
+		replacedByGopls: true,
 		isImportant: false,
 		description: 'Modify tags on structs',
 		defaultVersion: 'v1.17.0'
@@ -85,6 +85,15 @@ export const allToolsInformation: { [key: string]: Tool } = {
 		description: 'Linter',
 		minimumGoVersion: semver.coerce('1.20')
 	},
+	'golangci-lint-v2': {
+		name: 'golangci-lint-v2',
+		importPath: 'github.com/golangci/golangci-lint/v2/cmd/golangci-lint',
+		modulePath: 'github.com/golangci/golangci-lint/v2',
+		replacedByGopls: false,
+		isImportant: true,
+		description: 'Linter',
+		minimumGoVersion: semver.coerce('1.23')
+	},
 	'revive': {
 		name: 'revive',
 		importPath: 'github.com/mgechev/revive',
@@ -102,8 +111,8 @@ export const allToolsInformation: { [key: string]: Tool } = {
 		description: 'Language Server from Google',
 		usePrereleaseInPreviewMode: true,
 		minimumGoVersion: semver.coerce('1.19'),
-		latestVersion: semver.parse('v0.18.1'),
-		latestVersionTimestamp: moment('2025-02-24', 'YYYY-MM-DD')
+		latestVersion: semver.parse('v0.20.0'),
+		latestVersionTimestamp: moment('2025-07-28', 'YYYY-MM-DD')
 	},
 	'dlv': {
 		name: 'dlv',

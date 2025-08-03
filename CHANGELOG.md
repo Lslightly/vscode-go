@@ -5,16 +5,63 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## Unreleased
 
+## v0.49.0 (prerelease)
+
+Date: 2025-07-07
+
+This is the [pre-release version](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) of v0.50.
+
+**Full Changelog**: https://github.com/golang/vscode-go/compare/v0.48.0-rc.1...v0.49.0
+**Milestone**: https://github.com/golang/vscode-go/issues?q=milestone%3Av0.50.0
+
+## v0.48.0
+
+Date: 2025-06-30
+
 ### Changes
 
 * Introduced quick pick separator in command `Go: Choose Go Environment` showing
 diff between options locally discovered and options available for download.
+* Added support for golangci-lint v2 ([Issue 3732](https://github.com/golang/vscode-go/issues/3732))
+  * Added a new lint tool, `golangci-lint-v2`. It's added as an installable tool, so you can install it via the `Go: Install/Update Tools` command.
+  * You can switch v1 and v2 per workspace by using `golangci-lint` and `golangci-lint-v2` option. You must keep the `golangci-lint` executable version on your machine to v1 for that.
+  * You can also use `golangci-lint` executable updated to v2. Just keep using the `golangci-lint` option for that.
+  * The `path-mode` flag set by vscode-go can be overridden by the`go.lintFlags` option.
+  * Looking for a way to format your code with golangci-lint v2 on VS Code? Check the [golangci-lint documentation](https://golangci-lint.run/welcome/integrations/#visual-studio-code).
 
 ### Fixes
 
 * Addressed an issue that caused a `Cannot read properties of null (reading 'Token')`
 error during command execution when the command result did not include a token.
 ([Issue 3698](https://github.com/golang/vscode-go/issues/3698))
+* Addressed an issue that broke the `Debug Subtest At Cursor` command. ([Issue 3718](https://github.com/golang/vscode-go/issues/3718))
+
+## v0.47.4 (prerelease)
+
+Date: 2025-06-23
+
+This is the [pre-release version](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) of v0.48.
+
+**Full Changelog**: https://github.com/golang/vscode-go/compare/v0.46.0-rc.1...v0.47.4
+**Milestone**: https://github.com/golang/vscode-go/issues?q=milestone%3Av0.48.0
+
+## v0.47.3 (prerelease)
+
+Date: 2025-06-05
+
+This is the [pre-release version](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) of v0.48.
+
+**Full Changelog**: https://github.com/golang/vscode-go/compare/v0.46.0-rc.1...v0.47.3
+**Milestone**: https://github.com/golang/vscode-go/issues?q=milestone%3Av0.48.0
+
+## v0.47.2 (prerelease)
+
+Date: 2025-04-15
+
+This is the [pre-release version](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) of v0.48.
+
+**Full Changelog**: https://github.com/golang/vscode-go/compare/v0.46.0-rc.1...v0.47.2
+**Milestone**: https://github.com/golang/vscode-go/issues?q=milestone%3Av0.48.0
 
 ## v0.46.1
 
